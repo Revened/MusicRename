@@ -3,6 +3,10 @@ package org.example;
 import java.nio.file.Path;
 
 public class StringFormatter {
+    public static void IsArtistNeeded(boolean isArtistNeeded) {
+        StringFormatter.isArtistNeeded = isArtistNeeded;
+    }
+    private static boolean isArtistNeeded = true;
     private static String pathToNameSong(String str) {
         String[] actor_song = str.split("\\\\");
         String[] array = actor_song[actor_song.length - 1].split("-");
@@ -15,12 +19,16 @@ public class StringFormatter {
         return songName.toString();    //  название песни;
     }
     public static String formatArtistSong(String artist, String songPath) {
-        if (artist.contains("/")) {                                       //
-            String[] array = artist.split("/");                     // Если присутствуют несколько авторов
-            artist = array[0] + ", " + array[1];                          //
-        }
         String song = pathToNameSong(songPath);
-        return artist + " -" + song; // имя артиста + название песни
+        if (isArtistNeeded) {
+            if (artist.contains("/")) {                                       //
+                String[] array = artist.split("/");                     // Если присутствуют несколько авторов
+                artist = array[0] + ", " + array[1];                          //
+            }
+            return artist + " -" + song; // имя артиста + название песни
+        } else {
+            return song;
+        }
     }
     public static String formatSongArtist(String artist, String songPath) {
         String song = pathToNameSong(songPath);
