@@ -48,23 +48,23 @@ public class MyFileVisitor implements FileVisitor {
                                 fileCreate.uploadInfo(oldFile, StringFormatter.formatArtistSong(artist, path)); // Форматирование строки и обновление информации для последующего создания/изменения файла
 
                             }
-                        } catch (NullPointerException e) {
+                        } catch (NullPointerException e) { // В случае отсутствия артиста или других параметров
                             System.out.println(ConsoleOutput.ANSI_RED + StringFormatter.getFileName(file) + ConsoleOutput.RESET_COLOR +  " Отсутствует артист");
+                        } finally {
                             return FileVisitResult.CONTINUE;
                         }
-                        return FileVisitResult.CONTINUE;
-                    } catch (Exception e) {
+                    } catch (Exception e) {                 //  В случае возникновений ошибок в работе metadata
                         System.out.println(ConsoleOutput.ANSI_RED + e + ConsoleOutput.RESET_COLOR);
                         return FileVisitResult.CONTINUE;
                     }
-                } else {
+                } else { // если формат не mp3
                     System.out.println(ConsoleOutput.ANSI_RED + StringFormatter.getFileName(file) + ConsoleOutput.RESET_COLOR +  " Имеет неверный формат");
                     return FileVisitResult.CONTINUE;
                 }
 
             }
-            return FileVisitResult.TERMINATE;
-        }return FileVisitResult.CONTINUE;
+            return FileVisitResult.TERMINATE; // ограничение в 15 файлов
+        } return FileVisitResult.CONTINUE; // если не файл
     }
 
     @Override

@@ -13,7 +13,9 @@ public class Main {
     public static void main(String[] args) {
         FileCreate fileCreate = new FileCreate();
         Scanner scanner = new Scanner(System.in);
-        Path path = Paths.get("C:\\Users\\pvare\\Desktop\\Music\\newSortTest");
+        System.out.println("Введите полный путь до требуемых файлов");
+        Path path = Paths.get(scanner.nextLine());
+
         MyFileVisitor simpleFileVisitor = new MyFileVisitor(fileCreate);
         Set<FileVisitOption> options = new HashSet<>();
         try {
