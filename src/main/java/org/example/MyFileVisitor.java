@@ -22,35 +22,49 @@ public class MyFileVisitor implements FileVisitor {
 
     @Override
     public FileVisitResult visitFile(Object file, BasicFileAttributes attrs) throws IOException {
-        while (cycles-- != 0) {
-            String path = file.toString();
-            try (Metadata metadata = new Metadata(path)) {              // Поток для считывания инфы о песне
-                MP3RootPackage song = metadata.getRootPackageGeneric();
-                Path oldFile = Path.of(path);
-                String artist;
+        if (!attrs.isDirectory()) {
+            while (cycles-- != 0) {
+                String path = file.toString();
+                if (file.toString().endsWith("mp3")) {
+                    try (Metadata metadata = new Metadata(path)) {              // Поток для считывания инфы о песне
+                        MP3RootPackage song = metadata.getRootPackageGeneric();
+                        Path oldFile = Path.of(path);
+                        String artist;
+                        try {
+                            if (song.getID3V1() != null) {              // ID3V1
+                                artist = song.getID3V1().getArtist();
+                                fileCreate.uploadInfo(oldFile, StringFormatter.formatArtistSong(artist, path)); // Форматирование строки и обновление информации для последующего создания/изменения файла
 
-                if (song.getID3V1() != null) {              // ID3V1
-                    artist = song.getID3V1().getArtist();
-                    fileCreate.uploadInfo(oldFile, StringFormatter.formatArtistSong(artist, path)); // Форматирование строки и обновление информации для последующего создания/изменения файла
+                            } else if (song.getID3V2() != null) {       // ID3V2
+                                artist = song.getID3V2().getArtist();
+                                fileCreate.uploadInfo(oldFile, StringFormatter.formatArtistSong(artist, path)); // Форматирование строки и обновление информации для последующего создания/изменения файла
 
-                } else if (song.getID3V2() != null) {       // ID3V2
-                    artist = song.getID3V2().getArtist();
-                    fileCreate.uploadInfo(oldFile, StringFormatter.formatArtistSong(artist, path)); // Форматирование строки и обновление информации для последующего создания/изменения файла
+                            } else if (song.getLyrics3V2() != null) {   // Lyrics3V2
+                                artist = song.getLyrics3V2().getArtist();
+                                fileCreate.uploadInfo(oldFile, StringFormatter.formatArtistSong(artist, path)); // Форматирование строки и обновление информации для последующего создания/изменения файла
 
-                } else if (song.getLyrics3V2() != null) {   // Lyrics3V2
-                    artist = song.getLyrics3V2().getArtist();
-                    fileCreate.uploadInfo(oldFile, StringFormatter.formatArtistSong(artist, path)); // Форматирование строки и обновление информации для последующего создания/изменения файла
+                            } else if (song.getApeV2() != null) {       // ApeV2
+                                artist = song.getApeV2().getArtist();
+                                fileCreate.uploadInfo(oldFile, StringFormatter.formatArtistSong(artist, path)); // Форматирование строки и обновление информации для последующего создания/изменения файла
 
-                } else if (song.getApeV2() != null) {       // ApeV2
-                    artist = song.getApeV2().getArtist();
-                    fileCreate.uploadInfo(oldFile, StringFormatter.formatArtistSong(artist, path)); // Форматирование строки и обновление информации для последующего создания/изменения файла
-
+                            }
+                        } catch (NullPointerException e) {
+                            System.out.println(ConsoleOutput.ANSI_RED + StringFormatter.getFileName(file) + ConsoleOutput.RESET_COLOR +  " Отсутствует артист");
+                            return FileVisitResult.CONTINUE;
+                        }
+                        return FileVisitResult.CONTINUE;
+                    } catch (Exception e) {
+                        System.out.println(ConsoleOutput.ANSI_RED + e + ConsoleOutput.RESET_COLOR);
+                        return FileVisitResult.CONTINUE;
+                    }
+                } else {
+                    System.out.println(ConsoleOutput.ANSI_RED + StringFormatter.getFileName(file) + ConsoleOutput.RESET_COLOR +  " Имеет неверный формат");
+                    return FileVisitResult.CONTINUE;
                 }
-                return FileVisitResult.CONTINUE;
-            }
-        }
-        return FileVisitResult.TERMINATE;
 
+            }
+            return FileVisitResult.TERMINATE;
+        }return FileVisitResult.CONTINUE;
     }
 
     @Override
@@ -60,6 +74,6 @@ public class MyFileVisitor implements FileVisitor {
 
     @Override
     public FileVisitResult postVisitDirectory(Object dir, IOException exc) throws IOException {
-        return FileVisitResult.TERMINATE;
+        return FileVisitResult.CONTINUE;
     }
 }

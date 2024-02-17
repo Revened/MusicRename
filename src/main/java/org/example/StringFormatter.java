@@ -1,5 +1,7 @@
 package org.example;
 
+import java.nio.file.Path;
+
 public class StringFormatter {
     private static String pathToNameSong(String str) {
         String[] actor_song = str.split("\\\\");
@@ -23,5 +25,10 @@ public class StringFormatter {
     public static String formatSongArtist(String artist, String songPath) {
         String song = pathToNameSong(songPath);
         return song + " -" + artist; // название песни + имя артиста
+    }
+    public static String getFileName(Object path) {
+        String stringPath = path.toString();
+        String[] array = stringPath.split("\\\\");
+        return array[array.length - 1];
     }
 }
