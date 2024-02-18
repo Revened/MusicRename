@@ -24,32 +24,36 @@ public class MyFileVisitor implements FileVisitor {
     public FileVisitResult visitFile(Object file, BasicFileAttributes attrs) throws IOException {
         if (!attrs.isDirectory()) {
             while (cycles-- != 0) {
-                String path = file.toString();
+                Path path = Path.of(file.toString());
                 if (file.toString().endsWith("mp3")) {
-                    try (Metadata metadata = new Metadata(path)) {              // Поток для считывания инфы о песне
+                    try (Metadata metadata = new Metadata(path.toString())) {              // Поток для считывания инфы о песне
                         MP3RootPackage song = metadata.getRootPackageGeneric();
-                        Path oldFile = Path.of(path);
                         String artist;
+                        String songName;
                         try {
                             if (song.getID3V1() != null) {              // ID3V1
                                 artist = song.getID3V1().getArtist();
-                                fileCreate.uploadInfo(oldFile, StringFormatter.formatArtistSong(artist, path)); // Форматирование строки и обновление информации для последующего создания/изменения файла
+                                songName = song.getID3V2().getTitle();
+                                fileCreate.uploadInfo(path, StringFormatter.formatArtistSong(artist, path)); // Форматирование строки и обновление информации для последующего создания/изменения файла
 
                             } else if (song.getID3V2() != null) {       // ID3V2
                                 artist = song.getID3V2().getArtist();
-                                fileCreate.uploadInfo(oldFile, StringFormatter.formatArtistSong(artist, path)); // Форматирование строки и обновление информации для последующего создания/изменения файла
+                                songName = song.getID3V2().getTitle();
+                                fileCreate.uploadInfo(path, StringFormatter.formatArtistSong(artist, songName)); // Форматирование строки и обновление информации для последующего создания/изменения файла
 
                             } else if (song.getLyrics3V2() != null) {   // Lyrics3V2
                                 artist = song.getLyrics3V2().getArtist();
-                                fileCreate.uploadInfo(oldFile, StringFormatter.formatArtistSong(artist, path)); // Форматирование строки и обновление информации для последующего создания/изменения файла
+                                songName = song.getID3V2().getTitle();
+                                fileCreate.uploadInfo(path, StringFormatter.formatArtistSong(artist, path)); // Форматирование строки и обновление информации для последующего создания/изменения файла
 
                             } else if (song.getApeV2() != null) {       // ApeV2
                                 artist = song.getApeV2().getArtist();
-                                fileCreate.uploadInfo(oldFile, StringFormatter.formatArtistSong(artist, path)); // Форматирование строки и обновление информации для последующего создания/изменения файла
+                                songName = song.getID3V2().getTitle();
+                                fileCreate.uploadInfo(path, StringFormatter.formatArtistSong(artist, path)); // Форматирование строки и обновление информации для последующего создания/изменения файла
 
                             }
                         } catch (NullPointerException e) { // В случае отсутствия артиста или других параметров
-                            System.out.println(ConsoleOutput.ANSI_RED + StringFormatter.getFileName(file) + ConsoleOutput.RESET_COLOR +  " Отсутствует артист");
+                            System.out.println(ConsoleOutput.ANSI_RED + StringFormatter.getFileName(file) + ConsoleOutput.RESET_COLOR +  " Отсутствует артист или имя песни");
                         } finally {
                             return FileVisitResult.CONTINUE;
                         }

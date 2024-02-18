@@ -7,7 +7,8 @@ public class StringFormatter {
         StringFormatter.isArtistNeeded = isArtistNeeded;
     }
     private static boolean isArtistNeeded = true;
-    private static String pathToNameSong(String str) {
+    private static String pathToNameSong(Path path) {
+        String str = path.toString();
         String[] actor_song = str.split("\\\\");
         String[] array = actor_song[actor_song.length - 1].split("-");
         StringBuilder songName = new StringBuilder();
@@ -18,11 +19,11 @@ public class StringFormatter {
         } else songName.append(array[1]);           // Если нет знака -
         return songName.toString();    //  название песни;
     }
-    public static String formatArtistSong(String artist, String songPath) {
-        String song = pathToNameSong(songPath);
+    public static String formatArtistSong(String artist, Path songPath) {       // использовать если нет в файле название песни
+        String song = pathToNameSong(songPath);                                 // в таком случае будет использоваться имя файла
         if (isArtistNeeded) {
             if (artist.contains("/")) {                                       //
-                String[] array = artist.split("/");                     // Если присутствуют несколько авторов
+                String[] array = artist.split("/");                     // Если присутствуют два автора разделенные ; \ /
                 artist = array[0] + ", " + array[1];                          //
             }
             return artist + " -" + song; // имя артиста + название песни
@@ -30,7 +31,18 @@ public class StringFormatter {
             return song;
         }
     }
-    public static String formatSongArtist(String artist, String songPath) {
+    public static String formatArtistSong(String artist, String songName) {     // использовать если есть в файле название песни
+        if (isArtistNeeded) {
+            if (artist.contains("/")) {                                       //
+                String[] array = artist.split("/");                     // Если присутствуют два автора разделенные ; \ /
+                artist = array[0] + ", " + array[1];                          //
+            }
+            return artist + " - " + songName + ".mp3"; // имя артиста + название песни
+        } else {
+            return songName + ".mp3";
+        }
+    }
+    public static String formatSongArtist(String artist, Path songPath) {
         String song = pathToNameSong(songPath);
         return song + " -" + artist; // название песни + имя артиста
     }
