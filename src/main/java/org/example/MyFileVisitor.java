@@ -1,9 +1,15 @@
 package org.example;
 
-import com.groupdocs.metadata.Metadata;
-import com.groupdocs.metadata.core.MP3RootPackage;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.ParseContext;
+import org.apache.tika.parser.Parser;
+import org.apache.tika.parser.mp3.Mp3Parser;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.helpers.DefaultHandler;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 
@@ -23,41 +29,23 @@ public class MyFileVisitor implements FileVisitor {
     @Override
     public FileVisitResult visitFile(Object file, BasicFileAttributes attrs) throws IOException {
         if (!attrs.isDirectory()) {
-            while (cycles-- != 0) {
                 Path path = Path.of(file.toString());
                 if (file.toString().endsWith("mp3")) {
-                    try (Metadata metadata = new Metadata(path.toString())) {              // Поток для считывания инфы о песне
-                        MP3RootPackage song = metadata.getRootPackageGeneric();
-                        String artist;
-                        String songName;
-                        try {
-                            if (song.getID3V1() != null) {              // ID3V1
-                                artist = song.getID3V1().getArtist();
-                                songName = song.getID3V2().getTitle();
-                                fileCreate.uploadInfo(path, StringFormatter.formatArtistSong(artist, path)); // Форматирование строки и обновление информации для последующего создания/изменения файла
+                    try (InputStream input = new FileInputStream(path.toFile())) {
+                        ContentHandler handler = new DefaultHandler();
+                        Metadata metadata = new Metadata();
+                        Parser parser = new Mp3Parser();
+                        ParseContext parseCtx = new ParseContext();
+                        parser.parse(input, handler, metadata, parseCtx);
 
-                            } else if (song.getID3V2() != null) {       // ID3V2
-                                artist = song.getID3V2().getArtist();
-                                songName = song.getID3V2().getTitle();
-                                fileCreate.uploadInfo(path, StringFormatter.formatArtistSong(artist, songName)); // Форматирование строки и обновление информации для последующего создания/изменения файла
+                        String artist = metadata.get("xmpDM:artist");
+                        String songName = metadata.get("title");
 
-                            } else if (song.getLyrics3V2() != null) {   // Lyrics3V2
-                                artist = song.getLyrics3V2().getArtist();
-                                songName = song.getID3V2().getTitle();
-                                fileCreate.uploadInfo(path, StringFormatter.formatArtistSong(artist, path)); // Форматирование строки и обновление информации для последующего создания/изменения файла
+                        fileCreate.uploadInfo(path, StringFormatter.formatArtistTitle(artist, songName)); // Отправка инфы для создания файла
 
-                            } else if (song.getApeV2() != null) {       // ApeV2
-                                artist = song.getApeV2().getArtist();
-                                songName = song.getID3V2().getTitle();
-                                fileCreate.uploadInfo(path, StringFormatter.formatArtistSong(artist, path)); // Форматирование строки и обновление информации для последующего создания/изменения файла
+                        return FileVisitResult.CONTINUE;
 
-                            }
-                        } catch (NullPointerException e) { // В случае отсутствия артиста или других параметров
-                            System.out.println(ConsoleOutput.ANSI_RED + StringFormatter.getFileName(file) + ConsoleOutput.RESET_COLOR +  " Отсутствует артист или имя песни");
-                        } finally {
-                            return FileVisitResult.CONTINUE;
-                        }
-                    } catch (Exception e) {                 //  В случае возникновений ошибок в работе metadata
+                    } catch (Exception e) {
                         System.out.println(ConsoleOutput.ANSI_RED + e + ConsoleOutput.RESET_COLOR);
                         return FileVisitResult.CONTINUE;
                     }
@@ -66,8 +54,6 @@ public class MyFileVisitor implements FileVisitor {
                     return FileVisitResult.CONTINUE;
                 }
 
-            }
-            return FileVisitResult.TERMINATE; // ограничение в 15 файлов
         } return FileVisitResult.CONTINUE; // если не файл
     }
 

@@ -1,6 +1,5 @@
 package org.example;
 
-import java.io.IOException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,6 +14,7 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Введите полный путь до требуемых файлов");
         Path path = Paths.get(scanner.nextLine());
+
         StringFormatter.IsArtistNeeded(true);
 
         MyFileVisitor simpleFileVisitor = new MyFileVisitor(fileCreate);
