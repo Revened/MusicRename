@@ -16,6 +16,7 @@ public class Main {
         Path path = Paths.get(scanner.nextLine());
 
         StringFormatter.IsArtistNeeded(true);
+        StringFormatter.IsTitleNeeded(true);
 
         MyFileVisitor simpleFileVisitor = new MyFileVisitor(fileCreate);
         Set<FileVisitOption> options = new HashSet<>();
