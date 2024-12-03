@@ -31,6 +31,7 @@ public class MyFileVisitor implements FileVisitor {
         if (!attrs.isDirectory()) {
             Path path = Path.of(file.toString());
             if (file.toString().endsWith("mp3")) {
+                // Вынести в отдельный класс
                 try (InputStream input = new FileInputStream(path.toFile())) {
                     ContentHandler handler = new DefaultHandler();
                     Metadata metadata = new Metadata();
@@ -48,6 +49,7 @@ public class MyFileVisitor implements FileVisitor {
                     System.out.println(ConsoleOutput.ANSI_RED + e + ConsoleOutput.RESET_COLOR);
                     return FileVisitResult.CONTINUE;
                 }
+                //
             } else { // если формат не mp3
                 System.out.println(ConsoleOutput.ANSI_RED + StringFormatter.getFileName(file) + ConsoleOutput.RESET_COLOR + " Имеет неверный формат");
                 return FileVisitResult.CONTINUE;

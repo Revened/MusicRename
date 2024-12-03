@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FileCreate {
+    // singleton
     private List<String> list = new ArrayList<>();
     private List<Path> oldPath = new ArrayList<>();
     public void uploadInfo(Path oldPath, String list) {
